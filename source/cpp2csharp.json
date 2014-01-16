@@ -1,0 +1,26 @@
+{
+  "dependencies": [
+    "System",
+    "System.Collections",
+    "System.Collections.Generic",
+    "System.Text",
+    "System.Threading"
+  ],
+  "packages": [ 
+    {
+      "name": "Core",
+      "src": "../source/cpp/core",
+      "dst": "../source/csharp/glympse/core",
+      "exclude": [
+        ".DS_Store", "Common.h", "CommonImpl.h", "IString.h", "IStringBuilder.h", "Object.h"
+      ]
+    }, {
+      "name": "Hal",
+      "src": "../source/cpp/hal",
+      "dst": "../source/csharp/glympse/hal",
+      "exclude": [
+        ".DS_Store"
+      ]
+    }
+  ]
+}

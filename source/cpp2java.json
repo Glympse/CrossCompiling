@@ -1,0 +1,24 @@
+{
+  "dependencies": [
+    "java.util.*",
+    "com.glympse.java.core.*",
+    "com.glympse.java.hal.*"
+  ],
+  "packages": [ 
+    {
+      "name": "Core",
+      "src": "../source/cpp/core",
+      "dst": "../source/java/com/glympse/java/core",
+      "exclude": [
+        ".DS_Store", "Common.h", "CommonImpl.h", "ILong.h", "Long.h", "IString.h", "IStringBuilder.h", "Object.h"
+      ]
+    }, {
+      "name": "Hal",
+      "src": "../source/cpp/hal",
+      "dst": "../source/java/com/glympse/java/hal",
+      "exclude": [
+        ".DS_Store"
+      ]
+    }
+  ]
+}

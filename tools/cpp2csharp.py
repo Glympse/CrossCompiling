@@ -6,7 +6,7 @@
 #
 #------------------------------------------------------------------------------
 
-import os, re
+import os, re, codecs
 import translator, engine
 
 class CppToCSharp(translator.BasicTranslator):
@@ -215,8 +215,8 @@ class CppToCSharp(translator.BasicTranslator):
         self.filename_out = self.reg_file_name.sub(r'G\1', self.filename_out)
 
         # Open files
-        src_file = open(self.filename_in, 'r')
-        dst_file = open(self.filename_out, 'w')
+        src_file = codecs.open(self.filename_in, 'r', encoding='utf-8')
+        dst_file = codecs.open(self.filename_out, 'w', encoding='utf-8')
 
         # Perform the translation
         self.dst_file_contents = ''

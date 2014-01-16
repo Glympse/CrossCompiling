@@ -6,7 +6,7 @@
 #
 #------------------------------------------------------------------------------
 
-import os, re
+import os, re, codecs
 import translator, engine
 
 class CppToJava(translator.BasicTranslator):
@@ -161,8 +161,8 @@ class CppToJava(translator.BasicTranslator):
             os.makedirs(dst_dir)
 
         # Open files
-        src_file = open(self.filename_in, 'r')
-        dst_file = open(self.filename_out, 'w')
+        src_file = codecs.open(self.filename_in, 'r', encoding='utf-8')
+        dst_file = codecs.open(self.filename_out, 'w', encoding='utf-8')
                
         # Perform the translation
         self.dst_file_contents = ""   

@@ -140,7 +140,7 @@ class CppToJava(translator.BasicTranslator):
     def format_imports(self):
         imports = ""
         for dependency in self.config.data["dependencies"]:
-            imports += "import %s;\n" % dependency
+            imports += "import {0};{1}".format(dependency, os.linesep)
         return imports
     
     def translate(self, filename_in, filename_out, config):

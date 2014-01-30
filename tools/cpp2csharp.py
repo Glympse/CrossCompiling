@@ -130,8 +130,8 @@ class CppToCSharp(translator.BasicTranslator):
         src_line = src_line.replace("new LinkedList", "new GLinkedList")   
         # Arrays
         src_line = src_line.replace("ByteArray ", "byte[] ")                 
-        # Process class statement
-        if ( 0 == src_line.find("class ") ):
+        # Process class statement (test for it by ignoring leading whitespace)
+        if ( 0 == src_line.strip(None).find("class ")):
             src_line = src_line.replace(":", ",")
             src_line = src_line.replace(" , ", " : ", 1)
 

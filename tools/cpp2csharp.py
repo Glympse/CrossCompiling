@@ -214,6 +214,11 @@ class CppToCSharp(translator.BasicTranslator):
         # Java/C#. Update output file name
         self.filename_out = self.reg_file_name.sub(r'G\1', self.filename_out)
 
+        # Verify existence of destination directory
+        dst_dir = os.path.dirname(self.filename_out)
+        if ( False == os.path.exists(dst_dir) ):
+            os.makedirs(dst_dir)
+
         # Open files
         src_file = codecs.open(self.filename_in, 'r', encoding='utf-8')
         dst_file = codecs.open(self.filename_out, 'w', encoding='utf-8')

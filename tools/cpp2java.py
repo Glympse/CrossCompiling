@@ -95,7 +95,7 @@ class CppToJava(translator.BasicTranslator):
             src_line = src_line.replace("##IMPLEMENTS##", ", ")
         
         if ( 0 == src_line.find("#ifndef") ):
-            src_line = 'package ' + self.package + ';\n'
+            src_line = 'package ' + self.package + ';' + os.linesep
         if ( 0 == src_line.find("#") ):
             return None      
         if ( 0 == src_line.find("namespace") ):

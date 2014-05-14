@@ -152,7 +152,6 @@ class CppToCSharp(translator.BasicTranslator):
         src_line = src_line.replace(".endsWith(", ".EndsWith(")
         src_line = src_line.replace(".toLowerCase(", ".ToLower(")
         src_line = src_line.replace(".replace(", ".Replace(")
-        src_line = src_line.replace(".substring(", ".Substring(")
         # StringBuilder
         src_line = src_line.replace(".append(", ".Append(")
         src_line = src_line.replace(" append(", " Append(")

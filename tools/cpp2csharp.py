@@ -152,10 +152,6 @@ class CppToCSharp(translator.BasicTranslator):
         src_line = src_line.replace(".endsWith(", ".EndsWith(")
         src_line = src_line.replace(".toLowerCase(", ".ToLower(")
         src_line = src_line.replace(".replace(", ".Replace(")
-        # StringBuilder
-        src_line = src_line.replace(".append(", ".Append(")
-        src_line = src_line.replace(" append(", " Append(")
-        src_line = src_line.replace(".insert(", ".Insert(")
         # Vector
         src_line = src_line.replace(".contains(", ".Contains(")
         src_line = src_line.replace(".addElement(", ".Add(")

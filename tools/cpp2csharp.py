@@ -184,6 +184,8 @@ class CppToCSharp(translator.BasicTranslator):
         src_line = src_line.replace("GThrowable", "Exception")
         src_line = src_line.replace("Debug.ex(true);", "Debug.ex(e, true);")
         src_line = src_line.replace("Debug.ex(false);", "Debug.ex(e, false);")
+        src_line = src_line.replace("Helpers.ex(true);", "Helpers.ex(e, true);")
+        src_line = src_line.replace("Helpers.ex(false);", "Helpers.ex(e, false);")        
         src_line = src_line.replace("catch ( ... )", "catch ( Exception e )")
         # Math
         src_line = src_line.replace("Float.", "Single.")

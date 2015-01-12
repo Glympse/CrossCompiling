@@ -21,6 +21,7 @@ class CppToJava(translator.BasicTranslator):
         self.reg_const_amp_arg = re.compile(r'const\s ( [^&]* ) \&', re.VERBOSE)            
         self.reg_interface_name = re.compile(r'([\s.])I([A-Z][a-z][A-Za-z]*)', re.VERBOSE)    
         self.reg_file_name = re.compile(r'I([A-Z][a-z][A-Za-z]*)', re.VERBOSE)    
+        self.reg_instance_of = re.compile(r'Helpers.instanceOf< [\s]* ([A-Za-z]*) [\s]* > \( ([A-Za-z]*) \)', re.VERBOSE)    
         # RegEx. Templates        
         self.reg_template_1arg = re.compile(r'template<[\s]*class\s([A-Z_]*)[\s]*>\s(interface|class|struct)\s([A-Za-z]*)', re.VERBOSE)  
         self.reg_template_2args = re.compile(r'template<[\s]*class\s([A-Z_]*)[\s]*,[\s]*class[\s]*([A-Z_]*)[\s]*>\s(interface|class|struct)\s([A-Za-z]*)', re.VERBOSE)    
@@ -83,6 +84,7 @@ class CppToJava(translator.BasicTranslator):
         src_line = self.reg_comma_common.sub(r' implements \1', src_line)
         src_line = self.reg_const_amp_arg.sub(r'\1', src_line)
         src_line = self.reg_interface_name.sub(r'\1G\2', src_line)
+        src_line = self.reg_instance_of.sub(r'( \2 instanceof \1 )', src_line)
         src_line = self.reg_ll.sub(r'\1L', src_line)
         src_line = self.reg_array_decl.sub(r' \1[] \2 = new \1[\3];', src_line)
         src_line = self.reg_bytebuffer_decl.sub(r'byte[] \1 = new byte[\2];', src_line)   

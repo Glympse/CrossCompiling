@@ -122,13 +122,13 @@ class CppToJava(translator.BasicTranslator):
         src_line = src_line.replace("GThread", "Thread")
         src_line = src_line.replace("GRunnable", "Runnable")                    
         src_line = src_line.replace("StaticString", "String")                    
-        src_line = src_line.replace("OwnString", "String")                    
-        src_line = src_line.replace("GHashtable", "Hashtable") 
+        src_line = src_line.replace("OwnString", "String")
         src_line = src_line.replace("GEnumeration", "Enumeration") 
         src_line = src_line.replace("GComparator", "Comparator")       
         # Containers
         src_line = src_line.replace("new Vector", "new GVector")                 
-        src_line = src_line.replace("new LinkedList", "new GLinkedList")                  
+        src_line = src_line.replace("new LinkedList", "new GLinkedList")
+        src_line = src_line.replace("new Hashtable", "new GHashtable")               
         # Exception handling
         src_line = src_line.replace("GThrowable", "Throwable")        
         src_line = src_line.replace("Debug.ex(true);", "Debug.ex(e, true);")

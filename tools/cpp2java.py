@@ -207,6 +207,7 @@ class CppFactory:
     def translator(self):
         return CppToJava()
 
-manager = engine.Manager(CppFactory())
-manager.go()
+if __name__ == '__main__':
+    manager = engine.Manager(CppFactory())
+    manager.go()
 

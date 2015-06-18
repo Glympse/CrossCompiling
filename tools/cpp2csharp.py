@@ -257,5 +257,6 @@ class CSharpFactory:
     def translator(self):
         return CppToCSharp()
 
-manager = engine.Manager(CSharpFactory())
-manager.go()
+if __name__ == '__main__':
+    manager = engine.Manager(CSharpFactory())
+    manager.go()

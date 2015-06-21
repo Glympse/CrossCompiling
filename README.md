@@ -1,4 +1,4 @@
-# Cross Compiling Console
+# Cross Compiling
 
 ## Introduction
 

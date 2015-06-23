@@ -145,6 +145,9 @@ Glympse Core.
 Simple web application built on top of translating engine for demo/experimenting purposes. <br>
 [https://github.com/Glympse/CrossCompilingConsole](https://github.com/Glympse/CrossCompilingConsole)
 
+Cross Compiling presentation. <br>
+[http://www.slideshare.net/egorpushkin/glympse-api-crosscompiling](http://www.slideshare.net/egorpushkin/glympse-api-crosscompiling)
+
 ## License
 
 Code is licensed under the [The MIT License](http://opensource.org/licenses/MIT). <br>

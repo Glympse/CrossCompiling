@@ -5,9 +5,14 @@
 //------------------------------------------------------------------------------
 
 {% for type in package.types %}
-@class {{ type.name.name }};
+{% if type.is_protocol %}
+@protocol
+{%- else %}
+@class
+{%- endif %}
+ {{ type.name.objc_name }};
 {% endfor %}
 
 {% for type in package.types %}
-#import "{{ type.name.name }}.h"
+#import "{{ type.name.objc_name }}.h"
 {% endfor %}

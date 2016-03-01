@@ -14,7 +14,8 @@ class DirectoryWalker:
         self.package = package
         self.src_dir = package["src"]
         self.dest_dir = package["dst"]
-        self.exclude = package["exclude"]
+        self.include = package.get("include", [])
+        self.exclude = package.get("exclude", [])
         self.factory = factory
         self.config = config
 
@@ -28,6 +29,8 @@ class DirectoryWalker:
             src_file = self.src_dir + '/' + file
 
             # Check exclude filder
+            if self.include and ( not file in self.include ):
+                continue
             if ( file in self.exclude ) or os.path.isdir(src_file):
                 continue
 

@@ -33,6 +33,9 @@ class File:
 
     @staticmethod
     def read_relative(path):
-        this_path = os.path.dirname(os.path.realpath(__file__))
-        absolute_path = "{}/{}".format(this_path, path)
+        absolute_path = "{}/{}".format(File.local_path(), path)
         return File.read(absolute_path)
+
+    @staticmethod
+    def local_path():
+        return os.path.dirname(os.path.realpath(__file__))

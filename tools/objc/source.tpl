@@ -3,19 +3,7 @@
 //  Copyright (c) 2016 Glympse Inc. All rights reserved.
 //
 //------------------------------------------------------------------------------
-{% macro method_args(method) -%}
-{% for parameter in method.parameters %}
-{% if parameter.type.native %}
-{{ parameter.variable.name }}
-{%- else %}
-Glympse::ClassBinder::unwrap({{ parameter.variable.name }})
-{%- endif %}
-{% if not loop.last %}, {% endif %}
-{% endfor %}
-{%- endmacro %}
-{% macro method_call(method) -%}
-    _common->{{ method.name }}({{ method_args(method=method) }})
-{%- endmacro %}
+{% import 'macros.tpl' as macros %}
 
 {% for dependency in config.dependencies %}
 #import "{{ dependency }}"
@@ -23,16 +11,16 @@ Glympse::ClassBinder::unwrap({{ parameter.variable.name }})
 
 {% for type in syntax_tree.type_declarations %}
 {% if type.name %}
-@interface {{ type.name.name }}()
+@interface {{ type.name.objc_name }}()
 {
-    Glympse::{{ type.original_name }} _common;
+    {{ type.name.cpp_type }} _common;
 {% if type.is_sink %}
     GlyCommonSink* _commonSink;
 {% endif %}
 }
 @end
 
-@implementation {{ type.name.name }}
+@implementation {{ type.name.objc_name }}
 
 #pragma mark - Internals
 
@@ -49,27 +37,19 @@ Glympse::ClassBinder::unwrap({{ parameter.variable.name }})
     return self;
 }
 
-#pragma mark - {{ type.original_name }}
+#pragma mark - {{ type.name.cpp_type }}
 
 {% for method in type.body %}
-- ({{ method.return_type.name }}){{ method.name -}}
-{% for parameter in method.parameters %}
-{% if loop.first %}
-:({{ parameter.type.name }}){{ parameter.variable.name }}
-{%- else %}
- {{ parameter.variable.name }}:({{ parameter.type.name }}){{ parameter.variable.name }}
-{%- endif %}
-{% endfor %}
-
+{{ macros.method_signature(method=method) }}
 {
-{% if "void" != method.return_type %}
+{% if "void" != method.return_type.objc_type %}
 {% if method.return_type.native %}
-    return {{ method_call(method=method) }};
+    return {{ macros.method_call(method=method) }};
 {% else %}
-    return Glympse::ClassBinder::bind({{ method_call(method=method) }});
+    return Glympse::ClassBinder::bind({{ macros.method_call(method=method) }});
 {% endif %}
 {% else %}
-    {{ method_call(method=method) }};
+    {{ macros.method_call(method=method) }};
 {% endif %}
 }
 

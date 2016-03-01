@@ -15,6 +15,12 @@ import translator
 import engine
 
 
+class MethodGroup(object):
+
+    def __init__(self):
+        self.overrides = []
+
+
 class JavaToObjC(translator.BasicTranslator):
 
     def __init__(self, factory):
@@ -33,25 +39,37 @@ class JavaToObjC(translator.BasicTranslator):
 
             # Interface type
             type.original_name = type.name
-            type.name = self.__convert_type(config, type.name, ptr=False)
+            type.name = self.__convert_type(config, package, type.name)
 
             # Base class
             type.base = self.__base_class(package, type)
 
             # Global properties
-            type.is_protocol = type.name["name"] in package["protocols"]
-            type.is_sink = type.name["name"] in package["sinks"]
+            type.is_protocol = type.name["objc_name"] in config.data["protocols"]
+            type.is_sink = type.name["objc_name"] in package["sinks"]
 
             # File name
-            filename_out = filename_out.replace(type.original_name, type.name["name"])
+            filename_out = filename_out.replace(type.original_name, type.name["objc_name"])
 
+            type.method_index = {}
             for method in type.body:
+                # Group methods by name
+                if not method.name in type.method_index:
+                    type.method_index[method.name] = MethodGroup()
+                type.method_index[method.name].overrides.append(method)
+
                 # Argument types
                 for parameter in method.parameters:
-                    parameter.type = self.__convert_type(config, parameter.type)
+                    parameter.type = self.__convert_type(config, package, parameter.type)
 
                 # Return type
-                method.return_type = self.__convert_type(config, method.return_type)
+                method.return_type = self.__convert_type(config, package, method.return_type)
+
+            # Mark methods as overridden if they are
+            for method_name in type.method_index:
+                method_group = type.method_index[method_name]
+                for method in method_group.overrides:
+                    method.is_overridden = len(method_group.overrides) > 1
 
             # Generate header file
             self.__generate(self.factory.header_template, syntax_tree, config, filename_out, "h")
@@ -68,21 +86,37 @@ class JavaToObjC(translator.BasicTranslator):
         utilities.File.write(filepath, output)
 
     @staticmethod
-    def __convert_type(config, type, ptr=True):
+    def __convert_type(config, package, type):
         if isinstance(type, plyj.model.Type):
             type = type.name.value
         if type in config.data["types"]:
             return config.data["types"][type]
         if type.startswith("G"):
             interface_name = type[1:]
-            return {
-                "name": "Gly{}{}".format(interface_name, "*" if ptr else ""),
-                "native": False
-            }
+            objc_type_name = "Gly{}".format(interface_name)
+            is_protocol = objc_type_name in config.data["protocols"]
+            if is_protocol:
+                return {
+                    "objc_name": objc_type_name,
+                    "objc_type": "id<{}>".format(objc_type_name),
+                    "objc_arg_name": objc_type_name,
+                    "cpp_type": "Glympse::{}".format(type),
+                    "cpp_arg_type": "const Glympse::{}&".format(type),
+                    "native": False
+                }
+            else:
+                return {
+                    "objc_name": objc_type_name,
+                    "objc_type": "{}*".format(objc_type_name),
+                    "objc_arg_name": objc_type_name,
+                    "cpp_type": "Glympse::{}".format(type),
+                    "cpp_arg_type": "const Glympse::{}&".format(type),
+                    "native": False
+                }
 
     @staticmethod
     def __base_class(package, type):
-        name = type.name["name"]
+        name = type.name["objc_type"]
         if name in package["hierarchy"]:
             return package["hierarchy"][name]
         else:
@@ -97,10 +131,13 @@ class Factory:
 
     def __init__(self):
         self.parser = plyj.parser.Parser()
-        self.jinja_env = jinja2.Environment(trim_blocks=True, lstrip_blocks=True)
-        self.header_template = self.jinja_env.from_string(utilities.File.read_relative("./objc/header.tpl"))
-        self.source_template = self.jinja_env.from_string(utilities.File.read_relative("./objc/source.tpl"))
-        self.package_template = self.jinja_env.from_string(utilities.File.read_relative("./objc/package.tpl"))
+        self.jinja_env = jinja2.Environment(
+            trim_blocks=True,
+            lstrip_blocks=True,
+            loader=jinja2.FileSystemLoader("{}/objc".format(utilities.File.local_path())))
+        self.header_template = self.jinja_env.get_template("header.tpl")
+        self.source_template = self.jinja_env.get_template("source.tpl")
+        self.package_template = self.jinja_env.get_template("package.tpl")
 
     def translator(self):
         return JavaToObjC(self)

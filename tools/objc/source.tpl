@@ -26,7 +26,7 @@ Glympse::ClassBinder::unwrap({{ parameter.variable.name }})
 @interface {{ type.name.name }}()
 {
     Glympse::{{ type.original_name }} _common;
-{% if syntax_tree.is_sink %}
+{% if type.is_sink %}
     GlyCommonSink* _commonSink;
 {% endif %}
 }
@@ -42,7 +42,7 @@ Glympse::ClassBinder::unwrap({{ parameter.variable.name }})
     if ( self != nil )
     {
         _common = object;
-{% if syntax_tree.is_sink %}
+{% if type.is_sink %}
         _commonSink = [[GlyCommonSink alloc] initWithSink:_common];
 {% endif %}
     }
@@ -74,7 +74,7 @@ Glympse::ClassBinder::unwrap({{ parameter.variable.name }})
 }
 
 {% endfor %} {#- Methods #}
-{% if syntax_tree.is_sink %}
+{% if type.is_sink %}
 #pragma mark - GlyEventSink
 
 - (BOOL)addListener:(id<GlyEventListener>)listener

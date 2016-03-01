@@ -5,7 +5,7 @@
 //------------------------------------------------------------------------------
 {% macro base_class(type) -%}
 {{ type.base }}
-{%- if syntax_tree.is_sink %}
+{%- if type.is_sink %}
 < GlyEventSink >
 {%- endif %}
 {%- endmacro %}

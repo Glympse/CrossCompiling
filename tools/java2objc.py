@@ -40,7 +40,7 @@ class JavaToObjC(translator.BasicTranslator):
 
             # Global properties
             type.is_protocol = type.name["name"] in package["protocols"]
-            type.is_sync = type.name["name"] in package["sinks"]
+            type.is_sink = type.name["name"] in package["sinks"]
 
             # File name
             filename_out = filename_out.replace(type.original_name, type.name["name"])

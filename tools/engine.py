@@ -7,6 +7,7 @@
 import dircache, os, sys
 import utilities
 
+
 class DirectoryWalker:
 
     def __init__(self, package, factory, config):
@@ -17,7 +18,9 @@ class DirectoryWalker:
         self.factory = factory
         self.config = config
 
-    def process(self):            
+    def process(self):
+        self.factory.begin_package(self.config, self.package)
+
         dir = dircache.listdir(self.src_dir)
         dir = dir[:]
         
@@ -40,6 +43,9 @@ class DirectoryWalker:
             # Perform translation
             translator.translate(src_file, dest_file, self.config, self.package)
 
+        self.factory.package_completed(self.config, self.package)
+
+
 class Config:
 
     def __init__(self):
@@ -51,6 +57,7 @@ class Config:
         # Load config data    
         filename = sys.argv[1]
         self.data = utilities.File.read_json(filename)
+
 
 class Manager:
 

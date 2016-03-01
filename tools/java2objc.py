@@ -28,6 +28,9 @@ class JavaToObjC(translator.BasicTranslator):
             if not hasattr(type, "body"):
                 continue
 
+            # Add to the list of detected types
+            package["types"].append(type)
+
             # Interface type
             type.original_name = type.name
             type.name = self.__convert_type(config, type.name, ptr=False)
@@ -97,10 +100,18 @@ class Factory:
         self.jinja_env = jinja2.Environment(trim_blocks=True, lstrip_blocks=True)
         self.header_template = self.jinja_env.from_string(utilities.File.read_relative("./objc/header.tpl"))
         self.source_template = self.jinja_env.from_string(utilities.File.read_relative("./objc/source.tpl"))
+        self.package_template = self.jinja_env.from_string(utilities.File.read_relative("./objc/package.tpl"))
 
     def translator(self):
         return JavaToObjC(self)
 
+    def begin_package(self, config, package):
+        package["types"] = []
+
+    def package_completed(self, config, package):
+        output = self.package_template.render({"package": package, "config": config.data})
+        filepath = "{}/{}.h".format(package["dst"], package["name"])
+        utilities.File.write(filepath, output)
 
 if __name__ == '__main__':
     manager = engine.Manager(Factory())

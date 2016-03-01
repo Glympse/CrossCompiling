@@ -4,6 +4,7 @@
 #
 #------------------------------------------------------------------------------
 
+import os
 import json
 
 class File:
@@ -29,3 +30,8 @@ class File:
     def write_json(path, obj):   
         File.write(path, json.dumps(obj, indent=2, separators=(',', ': ')))
 
+    @staticmethod
+    def read_relative(path):
+        this_path = os.path.dirname(os.path.realpath(__file__))
+        absolute_path = "{}/{}".format(this_path, path)
+        return File.read(absolute_path)

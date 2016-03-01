@@ -204,7 +204,7 @@ class CppToCSharp(translator.BasicTranslator):
             imports += "using {0};{1}".format(dependency, os.linesep)
         return imports
     
-    def translate(self, filename_in, filename_out, config):
+    def translate(self, filename_in, filename_out, config, package):
         self.filename_in = filename_in
         self.filename_out = filename_out        
         self.config = config

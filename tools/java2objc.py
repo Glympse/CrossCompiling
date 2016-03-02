@@ -33,10 +33,13 @@ class JavaToObjC(translator.BasicTranslator):
         # Add to the list of detected types
         package["types"].append(type)
 
-        # Global properties
+        # Type properties
         type.is_protocol = type.name["objc_name"] in config.data["protocols"]
         type.is_sink = type.name["objc_name"] in package["sinks"]
         type.has_private = type.name["objc_name"] in package["private"]
+
+        # Interfaces
+        self.__load_interfaces(config, package, type)
 
         # File name
         filename_out = filename_out.replace(type.original_name, type.name["objc_name"])
@@ -80,6 +83,18 @@ class JavaToObjC(translator.BasicTranslator):
                     method.is_overridden = len(method_group.overrides) > 1
 
             return type
+
+    def __load_interfaces(self, config, package, type):
+        type.interfaces = []
+        if not type.name["objc_name"] in package["hierarchy"]:
+            return
+        type_hierarchy = package["hierarchy"][type.name["objc_name"]]
+        if not "interfaces" in type_hierarchy:
+            return
+        for interface in type_hierarchy["interfaces"]:
+            filepath = "{}/{}".format(package["src"], interface["source"])
+            interface_type = self.__load_type(config, package, filepath)
+            type.interfaces.append(interface_type)
 
     @staticmethod
     def __generate(template, type, config, package, filename, extension):

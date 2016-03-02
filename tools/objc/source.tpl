@@ -9,7 +9,7 @@
 #import "{{ dependency }}"
 {% endfor %}
 
-@interface {{ type.name.objc_name }}()
+@interface {{ type.name.objc_name }}(){{ macros.interfaces_list(type=type) }}
 {
 {% if type.has_private %}
     {{ type.name.cpp_type }}Private _common;
@@ -39,35 +39,14 @@
     return self;
 }
 
-#pragma mark - {{ type.name.cpp_type }}
+{{ macros.methods_impl(type=type) -}}
 
-{% for method in type.body %}
-{{ macros.method_signature(method=method) }}
-{
-{% if "void" != method.return_type.objc_type %}
-{% if method.return_type.native %}
-    return {{ macros.method_call(method=method) }};
-{% else %}
-    return Glympse::ClassBinder::bind({{ macros.method_call(method=method) }});
-{% endif %}
-{% else %}
-    {{ macros.method_call(method=method) }};
-{% endif %}
-}
-
-{% endfor %} {#- Methods #}
+{% for interface in type.interfaces %}
+{{ macros.methods_impl(type=interface) -}}
+{%- endfor %}
 {% if type.is_sink %}
-#pragma mark - GlyEventSink
+{% include "sink.tpl" %}
 
-- (BOOL)addListener:(id<GlyEventListener>)listener
-{
-    return [_commonSink addListener:listener];
-}
-
-- (BOOL)removeListener:(id<GlyEventListener>)listener
-{
-    return [_commonSink removeListener:listener];
-}
 
 {% endif %}
 @end

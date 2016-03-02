@@ -111,8 +111,16 @@ class JavaToObjC(translator.BasicTranslator):
         if type.startswith("G"):
             interface_name = type[1:]
             objc_type_name = "Gly{}".format(interface_name)
-            is_protocol = objc_type_name in config.data["protocols"]
-            if is_protocol:
+            if objc_type_name in config.data["undefined"]:
+                return {
+                    "objc_name": "GlyCommon",
+                    "objc_type": "GlyCommon*",
+                    "objc_arg_name": objc_type_name,
+                    "cpp_type": "Glympse::GCommon",
+                    "cpp_arg_type": "const Glympse::GCommon&",
+                    "native": False
+                }
+            elif objc_type_name in config.data["protocols"]:
                 return {
                     "objc_name": objc_type_name,
                     "objc_type": "id<{}>".format(objc_type_name),

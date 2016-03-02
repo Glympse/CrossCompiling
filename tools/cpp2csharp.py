@@ -253,10 +253,10 @@ class CppToCSharp(translator.BasicTranslator):
     def extension(self):
         return "cs"
 
-class CSharpFactory:
+class Factory(translator.BasicFactory):
     def translator(self):
         return CppToCSharp()
 
 if __name__ == '__main__':
-    manager = engine.Manager(CSharpFactory())
+    manager = engine.Manager(Factory())
     manager.go()

@@ -127,7 +127,7 @@ class JavaToObjC(translator.BasicTranslator):
         return ""
 
 
-class Factory:
+class Factory(translator.BasicFactory):
 
     def __init__(self):
         self.parser = plyj.parser.Parser()

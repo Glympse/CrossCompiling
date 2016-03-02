@@ -4,7 +4,7 @@
 #
 #------------------------------------------------------------------------------
 
-class BasicTranslator:
+class BasicTranslator(object):
 
     def processLine(self, src_line):              	
         # Handle '/* */' comments
@@ -90,5 +90,13 @@ class BasicTranslator:
             else:
                 end_pos = begin_pos + 1
             begin_pos = content.find(begin, end_pos + 1)
-        return content	
+        return content
 
+
+class BasicFactory(object):
+
+    def begin_package(self, config, package):
+        pass
+
+    def package_completed(self, config, package):
+        pass

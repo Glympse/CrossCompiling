@@ -13,12 +13,9 @@ import plyj.model
 import utilities
 import translator
 import engine
-
-
-class MethodGroup(object):
-
-    def __init__(self):
-        self.overrides = []
+import objc.base
+import objc.interface
+import objc.cls
 
 
 class JavaToObjC(translator.BasicTranslator):
@@ -27,125 +24,27 @@ class JavaToObjC(translator.BasicTranslator):
         self.factory = factory
 
     def translate(self, filename_in, filename_out, config, package):
-        # Load global type
-        type = self.__load_type(config, package, filename_in)
+        # Parse input file
+        syntax_tree = self.factory.parser.parse_file(str(filename_in))
+
+        # Find type declaration
+        type = objc.base.BaseTranslator.find_type(syntax_tree)
+        if not type:
+            return
 
         # Add to the list of detected types
         package["types"].append(type)
 
-        # Type properties
-        type.is_protocol = type.name["objc_name"] in config.data["protocols"]
-        type.is_sink = type.name["objc_name"] in package["sinks"]
-        type.has_private = type.name["objc_name"] in package["private"]
-
-        # Interfaces
-        self.__load_interfaces(config, package, type)
-
-        # File name
-        filename_out = filename_out.replace(type.original_name, type.name["objc_name"])
-
-        # Generate header file
-        self.__generate(self.factory.header_template, type, config, package, filename_out, "h")
-        # Generate source file
-        if not type.is_protocol:
-            self.__generate(self.factory.source_template, type, config, package, filename_out, "mm")
-
-    def __load_type(self, config, package, filepath):
-        # Parse input file
-        syntax_tree = self.factory.parser.parse_file(str(filepath))
-
-        for type in syntax_tree.type_declarations:
-            if not hasattr(type, "body"):
-                continue
-
-            # Interface type
-            type.original_name = type.name
-            type.name = self.__convert_type(config, package, type.name)
-
-            type.method_index = {}
-            for method in type.body:
-                # Group methods by name
-                if not method.name in type.method_index:
-                    type.method_index[method.name] = MethodGroup()
-                type.method_index[method.name].overrides.append(method)
-
-                # Argument types
-                for parameter in method.parameters:
-                    parameter.type = self.__convert_type(config, package, parameter.type)
-
-                # Return type
-                method.return_type = self.__convert_type(config, package, method.return_type)
-
-            # Mark methods as overridden if they are
-            for method_name in type.method_index:
-                method_group = type.method_index[method_name]
-                for method in method_group.overrides:
-                    method.is_overridden = len(method_group.overrides) > 1
-
-            return type
-
-    def __load_interfaces(self, config, package, type):
-        type.interfaces = []
-        if not type.name["objc_name"] in package["hierarchy"]:
-            return
-        type_hierarchy = package["hierarchy"][type.name["objc_name"]]
-        if not "interfaces" in type_hierarchy:
-            return
-        for interface in type_hierarchy["interfaces"]:
-            filepath = "{}/{}".format(package["src"], interface["source"])
-            interface_type = self.__load_type(config, package, filepath)
-            type.interfaces.append(interface_type)
-
-    @staticmethod
-    def __generate(template, type, config, package, filename, extension):
-        output = template.render({"type": type, "config": config.data, "package": package})
-        filepath = "{}{}".format(filename, extension)
-        utilities.File.write(filepath, output)
-
-    @staticmethod
-    def __convert_type(config, package, type):
-        if isinstance(type, plyj.model.Type):
-            type = type.name.value
-        if type in config.data["types"]:
-            return config.data["types"][type]
-        if type.startswith("G"):
-            interface_name = type[1:]
-            objc_type_name = "Gly{}".format(interface_name)
-            if objc_type_name in config.data["undefined"]:
-                return {
-                    "objc_name": "GlyCommon",
-                    "objc_type": "GlyCommon*",
-                    "objc_arg_name": objc_type_name,
-                    "cpp_type": "Glympse::GCommon",
-                    "cpp_arg_type": "const Glympse::GCommon&",
-                    "native": False
-                }
-            elif objc_type_name in config.data["protocols"]:
-                return {
-                    "objc_name": objc_type_name,
-                    "objc_type": "id<{}>".format(objc_type_name),
-                    "objc_arg_name": objc_type_name,
-                    "cpp_type": "Glympse::{}".format(type),
-                    "cpp_arg_type": "const Glympse::{}&".format(type),
-                    "native": False
-                }
-            else:
-                return {
-                    "objc_name": objc_type_name,
-                    "objc_type": "{}*".format(objc_type_name),
-                    "objc_arg_name": objc_type_name,
-                    "cpp_type": "Glympse::{}".format(type),
-                    "cpp_arg_type": "const Glympse::{}&".format(type),
-                    "native": False
-                }
-
-    @staticmethod
-    def __base_class(package, type):
-        name = type.name["objc_type"]
-        if name in package["hierarchy"]:
-            return package["hierarchy"][name]
+        # Pick proper translator
+        if isinstance(type, plyj.model.InterfaceDeclaration):
+            translator = objc.interface.InterfaceTranslator(self.factory)
+        elif isinstance(type, plyj.model.ClassDeclaration):
+            translator = objc.cls.ClassTranslator(self.factory)
         else:
-            return "GlyCommon"
+            return
+
+        # Perform translation and generate output file(s)
+        translator.translate(config, package, type, filename_out)
 
     def extension(self):
         # Leave extension blank so that translator can generate both .h and .mm files later.
@@ -156,24 +55,33 @@ class Factory(translator.BasicFactory):
 
     def __init__(self):
         self.parser = plyj.parser.Parser()
-        self.jinja_env = jinja2.Environment(
+
+        self.interface_env = jinja2.Environment(
             trim_blocks=True,
             lstrip_blocks=True,
-            loader=jinja2.FileSystemLoader("{}/objc".format(utilities.File.local_path())))
-        self.header_template = self.jinja_env.get_template("header.tpl")
-        self.source_template = self.jinja_env.get_template("source.tpl")
-        self.package_template = self.jinja_env.get_template("package.tpl")
+            loader=jinja2.FileSystemLoader("{}/objc/interface".format(utilities.File.local_path())))
+        self.interface_header_template = self.interface_env.get_template("header.tpl")
+        self.interface_source_template = self.interface_env.get_template("source.tpl")
+        self.interface_package_template = self.interface_env.get_template("package.tpl")
 
-    def translator(self):
-        return JavaToObjC(self)
+        self.class_env = jinja2.Environment(
+            trim_blocks=True,
+            lstrip_blocks=True,
+            loader=jinja2.FileSystemLoader("{}/objc/class".format(utilities.File.local_path())))
+        self.class_header_template = self.class_env.get_template("header.tpl")
+        self.class_source_template = self.class_env.get_template("source.tpl")
 
     def begin_package(self, config, package):
         package["types"] = []
 
     def package_completed(self, config, package):
-        output = self.package_template.render({"package": package, "config": config.data})
+        output = self.interface_package_template.render({"package": package, "config": config.data})
         filepath = "{}/{}.h".format(package["dst"], package["name"])
         utilities.File.write(filepath, output)
+
+    def translator(self):
+        return JavaToObjC(self)
+
 
 if __name__ == '__main__':
     manager = engine.Manager(Factory())

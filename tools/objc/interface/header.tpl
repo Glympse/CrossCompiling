@@ -15,5 +15,5 @@
 
 {{ macros.method_signature(method=method) }};
 
-{% endfor %} {# Methods #}
+{% endfor %}
 @end

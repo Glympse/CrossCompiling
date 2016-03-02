@@ -1,5 +1,9 @@
-{% macro base_class(type) -%}
-{{ type.base }}
+{% macro base_class(package, type) -%}
+{% if type.name.objc_name in package.hierarchy and package.hierarchy[type.name.objc_name].base %}
+{{ package.hierarchy[type.name.objc_name].base }}
+{% else %}
+GlyCommon
+{%- endif %}
 {%- if type.is_sink %}
 < GlyEventSink >
 {%- endif %}

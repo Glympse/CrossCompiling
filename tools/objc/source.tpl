@@ -9,11 +9,13 @@
 #import "{{ dependency }}"
 {% endfor %}
 
-{% for type in syntax_tree.type_declarations %}
-{% if type.name %}
 @interface {{ type.name.objc_name }}()
 {
+{% if type.has_private %}
+    {{ type.name.cpp_type }}Private _common;
+{% else %}
     {{ type.name.cpp_type }} _common;
+{% endif %}
 {% if type.is_sink %}
     GlyCommonSink* _commonSink;
 {% endif %}
@@ -69,6 +71,3 @@
 
 {% endif %}
 @end
-
-{% endif %} {# Type name specified #}
-{% endfor %} {# Types #}

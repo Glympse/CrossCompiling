@@ -27,29 +27,37 @@ class JavaToObjC(translator.BasicTranslator):
         self.factory = factory
 
     def translate(self, filename_in, filename_out, config, package):
+        # Load global type
+        type = self.__load_type(config, package, filename_in)
+
+        # Add to the list of detected types
+        package["types"].append(type)
+
+        # Global properties
+        type.is_protocol = type.name["objc_name"] in config.data["protocols"]
+        type.is_sink = type.name["objc_name"] in package["sinks"]
+        type.has_private = type.name["objc_name"] in package["private"]
+
+        # File name
+        filename_out = filename_out.replace(type.original_name, type.name["objc_name"])
+
+        # Generate header file
+        self.__generate(self.factory.header_template, type, config, package, filename_out, "h")
+        # Generate source file
+        if not type.is_protocol:
+            self.__generate(self.factory.source_template, type, config, package, filename_out, "mm")
+
+    def __load_type(self, config, package, filepath):
         # Parse input file
-        syntax_tree = self.factory.parser.parse_file(str(filename_in))
+        syntax_tree = self.factory.parser.parse_file(str(filepath))
 
         for type in syntax_tree.type_declarations:
             if not hasattr(type, "body"):
                 continue
 
-            # Add to the list of detected types
-            package["types"].append(type)
-
             # Interface type
             type.original_name = type.name
             type.name = self.__convert_type(config, package, type.name)
-
-            # Base class
-            type.base = self.__base_class(package, type)
-
-            # Global properties
-            type.is_protocol = type.name["objc_name"] in config.data["protocols"]
-            type.is_sink = type.name["objc_name"] in package["sinks"]
-
-            # File name
-            filename_out = filename_out.replace(type.original_name, type.name["objc_name"])
 
             type.method_index = {}
             for method in type.body:
@@ -71,17 +79,11 @@ class JavaToObjC(translator.BasicTranslator):
                 for method in method_group.overrides:
                     method.is_overridden = len(method_group.overrides) > 1
 
-            # Generate header file
-            self.__generate(self.factory.header_template, syntax_tree, config, filename_out, "h")
-            # Generate source file
-            if not type.is_protocol:
-                self.__generate(self.factory.source_template, syntax_tree, config, filename_out, "mm")
-
-            break
+            return type
 
     @staticmethod
-    def __generate(template, syntax_tree, config, filename, extension):
-        output = template.render({"syntax_tree": syntax_tree, "config": config.data})
+    def __generate(template, type, config, package, filename, extension):
+        output = template.render({"type": type, "config": config.data, "package": package})
         filepath = "{}{}".format(filename, extension)
         utilities.File.write(filepath, output)
 

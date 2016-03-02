@@ -5,20 +5,15 @@
 //------------------------------------------------------------------------------
 {% import 'macros.tpl' as macros %}
 
-{% for type in syntax_tree.type_declarations %}
-{% if type.name %}
 {% if type.is_protocol %}
 @protocol {{ type.name.objc_name }}< NSObject >
 {% else %}
-@interface {{ type.name.objc_name }} : {{ macros.base_class(type=type) }}
+@interface {{ type.name.objc_name }} : {{ macros.base_class(package=package, type=type) }}
 {% endif %}
-{% for method in type.body %}
 
-{{ macros.method_signature(method=method) }}; {# Parameters #}
+{% for method in type.body -%}
+
+{{ macros.method_signature(method=method) }};
 
 {% endfor %} {# Methods #}
-
 @end
-
-{% endif %} {# Type name specified #}
-{% endfor %} {# Types #}

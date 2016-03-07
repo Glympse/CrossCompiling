@@ -10,7 +10,7 @@ import base
 class ClassTranslator(base.BaseTranslator):
 
     def translate(self, config, package, type, filename_out):
-        # Post process interface declation
+        # Post process interface declaration
         self.__process_type(config, package, type)
 
         # File name
@@ -31,9 +31,5 @@ class ClassTranslator(base.BaseTranslator):
             "objc_name": objc_name
         }
 
-        # Update types
-        for item in type.body:
-            if hasattr(item, "type"):
-                item.type = self.convert_type(config, package, item.type)
-            elif hasattr(item, "return_type"):
-                item.return_type = self.convert_type(config, package, item.return_type)
+        # Method parameter and return types
+        base.BaseTranslator.convert_types(config, package, type)

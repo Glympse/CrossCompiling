@@ -7,6 +7,12 @@
 import utilities
 
 
+class MethodGroup(object):
+
+    def __init__(self):
+        self.overrides = []
+
+
 class BaseTranslator(object):
 
     def __init__(self, factory):
@@ -24,6 +30,36 @@ class BaseTranslator(object):
         output = template.render({"type": type, "config": config.data, "package": package})
         filepath = "{}{}".format(filename, extension)
         utilities.File.write(filepath, output)
+
+    @staticmethod
+    def convert_types(config, package, type):
+        type.method_index = {}
+        for item in type.body:
+            if hasattr(item, "type"):
+                item.type = BaseTranslator.convert_type(config, package, item.type)
+            elif hasattr(item, "return_type"):
+                # Group methods by name
+                if not item.name in type.method_index:
+                    type.method_index[item.name] = MethodGroup()
+                type.method_index[item.name].overrides.append(item)
+
+                # Parameter types
+                invalid_params = []
+                for parameter in item.parameters:
+                    parameter.type = BaseTranslator.convert_type(config, package, parameter.type)
+                    if not parameter.type:
+                        invalid_params.append(parameter)
+                for parameter in invalid_params:
+                    item.parameters.remove(parameter)
+
+                # Return type
+                item.return_type = BaseTranslator.convert_type(config, package, item.return_type)
+
+        # Mark methods as overridden if they are
+        for method_name in type.method_index:
+            method_group = type.method_index[method_name]
+            for method in method_group.overrides:
+                method.is_overridden = len(method_group.overrides) > 1
 
     @staticmethod
     def convert_type(config, package, type):

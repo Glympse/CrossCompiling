@@ -3,6 +3,7 @@
 //  Copyright (c) 2016 Glympse Inc. All rights reserved.
 //
 //------------------------------------------------------------------------------
+{% import 'macros.tpl' as macros %}
 
 {% for dependency in config.dependencies %}
 #import "{{ dependency }}"
@@ -14,12 +15,12 @@
 
 {% for item in type.body %}
 {% if item.return_type %}
-+ ({{ item.return_type.objc_type }}){{ item.name }}
+{{ macros.method_signature(method=item) }}
 {
 {% if item.return_type.native %}
-    return Glympse::{{ type.name.java_name }}::{{ item.name }}();
+    return Glympse::{{ type.name.java_name }}::{{ item.name }}({{ macros.method_call_args(method=item) }});
 {% else %}
-    return Glympse::ClassBinder::bind(Glympse::{{ type.name.java_name }}::{{ item.name }}());
+    return Glympse::ClassBinder::bind(Glympse::{{ type.name.java_name }}::{{ item.name }}({{ macros.method_call_args(method=item) }}));
 {% endif %}
 }
 {% else %}

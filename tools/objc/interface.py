@@ -7,16 +7,10 @@
 import base
 
 
-class MethodGroup(object):
-
-    def __init__(self):
-        self.overrides = []
-
-
 class InterfaceTranslator(base.BaseTranslator):
 
     def translate(self, config, package, type, filename_out):
-        # Post process interface declation
+        # Post process interface declaration
         self.__process_type(config, package, type)
 
         # Type properties
@@ -53,25 +47,8 @@ class InterfaceTranslator(base.BaseTranslator):
         type.original_name = type.name
         type.name = self.convert_type(config, package, type.name)
 
-        type.method_index = {}
-        for method in type.body:
-            # Group methods by name
-            if not method.name in type.method_index:
-                type.method_index[method.name] = MethodGroup()
-            type.method_index[method.name].overrides.append(method)
-
-            # Argument types
-            for parameter in method.parameters:
-                parameter.type = self.convert_type(config, package, parameter.type)
-
-            # Return type
-            method.return_type = self.convert_type(config, package, method.return_type)
-
-        # Mark methods as overridden if they are
-        for method_name in type.method_index:
-            method_group = type.method_index[method_name]
-            for method in method_group.overrides:
-                method.is_overridden = len(method_group.overrides) > 1
+        # Method parameter and return types
+        base.BaseTranslator.convert_types(config, package, type)
 
     def __load_interfaces(self, config, package, type):
         type.interfaces = []

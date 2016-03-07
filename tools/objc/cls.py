@@ -4,8 +4,6 @@
 #
 #------------------------------------------------------------------------------
 
-import plyj.model
-
 import base
 
 
@@ -33,9 +31,9 @@ class ClassTranslator(base.BaseTranslator):
             "objc_name": objc_name
         }
 
-        # Udpate types
+        # Update types
         for item in type.body:
-            if isinstance(item, plyj.model.FieldDeclaration):
+            if hasattr(item, "type"):
                 item.type = self.convert_type(config, package, item.type)
-            elif isinstance(item, plyj.model.MethodDeclaration):
+            elif hasattr(item, "return_type"):
                 item.return_type = self.convert_type(config, package, item.return_type)

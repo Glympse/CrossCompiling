@@ -26,6 +26,8 @@ class JavaToObjC(translator.BasicTranslator):
     def translate(self, filename_in, filename_out, config, package):
         # Parse input file
         syntax_tree = self.factory.parser.parse_file(str(filename_in))
+        if not syntax_tree:
+            return
 
         # Find type declaration
         type = objc.base.BaseTranslator.find_type(syntax_tree)

@@ -4,8 +4,6 @@
 #
 #------------------------------------------------------------------------------
 
-import plyj.model
-
 import utilities
 
 
@@ -29,7 +27,7 @@ class BaseTranslator(object):
 
     @staticmethod
     def convert_type(config, package, type):
-        if isinstance(type, plyj.model.Type):
+        if hasattr(type, "name"):
             type = type.name.value
         if type in config.data["types"]:
             return config.data["types"][type]

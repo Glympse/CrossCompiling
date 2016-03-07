@@ -33,15 +33,16 @@ class BaseTranslator(object):
 
     @staticmethod
     def convert_types(config, package, type):
-        type.method_index = {}
+        invalid_methods = []
+        method_index = {}
         for item in type.body:
             if hasattr(item, "type"):
                 item.type = BaseTranslator.convert_type(config, package, item.type)
             elif hasattr(item, "return_type"):
                 # Group methods by name
-                if not item.name in type.method_index:
-                    type.method_index[item.name] = MethodGroup()
-                type.method_index[item.name].overrides.append(item)
+                if not item.name in method_index:
+                    method_index[item.name] = MethodGroup()
+                method_index[item.name].overrides.append(item)
 
                 # Parameter types
                 invalid_params = []
@@ -49,15 +50,25 @@ class BaseTranslator(object):
                     parameter.type = BaseTranslator.convert_type(config, package, parameter.type)
                     if not parameter.type:
                         invalid_params.append(parameter)
+
+                # Remove parameters of unknown types
                 for parameter in invalid_params:
                     item.parameters.remove(parameter)
 
                 # Return type
                 item.return_type = BaseTranslator.convert_type(config, package, item.return_type)
+                if not item.return_type:
+                    invalid_methods.append(item)
+            else:
+                invalid_methods.append(item)
+
+        # Remove methods marked invalid
+        for method in invalid_methods:
+            type.body.remove(method)
 
         # Mark methods as overridden if they are
-        for method_name in type.method_index:
-            method_group = type.method_index[method_name]
+        for method_name in method_index:
+            method_group = method_index[method_name]
             for method in method_group.overrides:
                 method.is_overridden = len(method_group.overrides) > 1
 

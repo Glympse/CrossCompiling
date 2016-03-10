@@ -147,7 +147,7 @@ class CppToJava(translator.BasicTranslator):
             imports += "import {0};{1}".format(dependency, os.linesep)
         return imports
     
-    def translate(self, filename_in, filename_out, config):
+    def translate(self, filename_in, filename_out, config, package):
         self.filename_in = filename_in
         self.filename_out = filename_out        
         self.config = config
@@ -203,11 +203,11 @@ class CppToJava(translator.BasicTranslator):
     def extension(self):
         return "java"
 
-class CppFactory:
+class Factory(translator.BasicFactory):
     def translator(self):
         return CppToJava()
 
 if __name__ == '__main__':
-    manager = engine.Manager(CppFactory())
+    manager = engine.Manager(Factory())
     manager.go()
 

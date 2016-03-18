@@ -74,6 +74,7 @@ class BaseTranslator(object):
 
     @staticmethod
     def convert_type(config, package, type):
+        type_info = type
         if hasattr(type, "name"):
             type = type.name.value
         if type in config.data["types"]:
@@ -100,9 +101,20 @@ class BaseTranslator(object):
                     "native": False
                 }
             else:
+                specializations = []
+                if objc_type_name in config.data["generics"]:
+                    for generic_type in type_info.type_arguments:
+                        spec_type = BaseTranslator.convert_type(config, package, generic_type)
+                        specializations.append(spec_type["objc_type"])
+
+                if 0 < len(specializations):
+                    objc_type = "{}<{}>*".format(objc_type_name, ",".join(specializations))
+                else:
+                    objc_type = "{}*".format(objc_type_name)
+
                 return {
                     "objc_name": objc_type_name,
-                    "objc_type": "{}*".format(objc_type_name),
+                    "objc_type": objc_type,
                     "objc_arg_name": objc_type_name,
                     "cpp_type": "Glympse::{}".format(type),
                     "cpp_arg_type": "const Glympse::{}&".format(type),

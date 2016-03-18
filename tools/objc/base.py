@@ -4,6 +4,8 @@
 #
 #------------------------------------------------------------------------------
 
+import plyj.model
+
 import utilities
 
 
@@ -120,3 +122,14 @@ class BaseTranslator(object):
                     "cpp_arg_type": "const Glympse::{}&".format(type),
                     "native": False
                 }
+
+    @staticmethod
+    def convert_extends(config, package, type):
+        converted = []
+        extends = type.extends
+        if isinstance(extends, list):
+            for extend in extends:
+                converted.append(BaseTranslator.convert_type(config, package, extend))
+        elif isinstance(extends, plyj.model.Type):
+            converted.append(BaseTranslator.convert_type(config, package, extends))
+        return converted

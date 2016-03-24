@@ -12,9 +12,9 @@
 @interface {{ type.name.objc_name }}(){{ macros.interfaces_list(type=type) }}
 {
 {% if type.has_private %}
-    {{ type.name.cpp_type }}Private _common;
+    {{ type.name.cpp_holder_private_type }} _common;
 {% else %}
-    {{ type.name.cpp_type }} _common;
+    {{ type.name.cpp_holder_type }} _common;
 {% endif %}
 {% if type.is_sink %}
     GlyCommonSink* _commonSink;
@@ -33,7 +33,7 @@
     {
         _common = object;
 {% if type.is_sink %}
-        _commonSink = [[GlyCommonSink alloc] initWithSink:_common];
+        _commonSink = [[GlyCommonSink alloc] initWithSink:object];
 {% endif %}
     }
     return self;

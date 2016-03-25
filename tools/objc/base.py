@@ -121,6 +121,8 @@ class BaseTranslator(object):
                     "objc_type": objc_type,
                     "objc_arg_name": objc_type_name,
                     "cpp_type": "Glympse::{}".format(type),
+                    "cpp_holder_type": "Glympse::Holder<Glympse::I{}>".format(interface_name),
+                    "cpp_holder_private_type": "Glympse::Holder<Glympse::I{}Private>".format(interface_name),
                     "cpp_arg_type": "const Glympse::{}&".format(type),
                     "native": False
                 }

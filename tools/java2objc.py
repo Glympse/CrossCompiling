@@ -6,7 +6,6 @@
 #
 #------------------------------------------------------------------------------
 
-import sys
 import jinja2
 
 import plyj.parser
@@ -91,45 +90,13 @@ class Factory(translator.BasicFactory):
         package["types_info"] = self.types_info
 
     def package_completed(self, config, package):
-        package["types"] = Factory.dependency_sort(package)
+        package["types"] = objc.base.BaseTranslator.dependency_sort(package)
         output = self.interface_package_template.render({"package": package, "config": config.data})
         filepath = "{}/{}.h".format(package["dst"], package["name"])
         utilities.File.write(filepath, output)
 
     def translator(self):
         return JavaToObjC(self)
-
-    @staticmethod
-    def dependency_sort(package):
-        types = package["types"]
-        info = package["types_info"]
-        sorted = []
-
-        last_length = sys.maxint
-        while len(types) < last_length and 0 < len(types):
-            last_length = len(types)
-            next_types = list(types)
-            for type in types:
-                satisfied = True
-                for dependency in type.extends:
-                    name = dependency["objc_name"]
-                    if name in info:
-                        # We only care about types that are imported as
-                        # part of the same package. If the dependency is
-                        # being satisfied in another way, then it is not
-                        # relevant to this sort. So we simply check if
-                        # there is a dependency still in the type list.
-                        if info[name] in types:
-                            satisfied = False
-                            break
-                if satisfied:
-                    sorted.append(type)
-                    next_types.remove(type)
-            types = next_types
-
-        if 0 != len(types):
-            raise Exception('Unable to satisfy dependencies: ', types)
-        return sorted
 
 if __name__ == '__main__':
     manager = engine.Manager(Factory())

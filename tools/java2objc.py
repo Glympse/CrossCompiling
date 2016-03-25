@@ -7,6 +7,7 @@
 #------------------------------------------------------------------------------
 
 import jinja2
+
 import plyj.parser
 import plyj.model
 
@@ -36,6 +37,12 @@ class JavaToObjC(translator.BasicTranslator):
 
         # Add to the list of detected types
         package["types"].append(type)
+
+        # Transform and gather information on generated types for later transforms.
+        type.extends = objc.base.BaseTranslator.convert_extends(config, package, type)
+        type_info = objc.base.BaseTranslator.convert_type(config, package, type.name)
+        if type_info is not None:
+            package["types_info"][type_info["objc_name"]] = type
 
         # Pick proper translator
         if isinstance(type, plyj.model.InterfaceDeclaration):
@@ -73,17 +80,23 @@ class Factory(translator.BasicFactory):
         self.class_header_template = self.class_env.get_template("header.tpl")
         self.class_source_template = self.class_env.get_template("source.tpl")
 
+        # We want to gather type info through all our generated
+        # packages; so initialize here and accumulate during
+        # translation.
+        self.types_info = {}
+
     def begin_package(self, config, package):
         package["types"] = []
+        package["types_info"] = self.types_info
 
     def package_completed(self, config, package):
+        package["types"] = objc.base.BaseTranslator.dependency_sort(package)
         output = self.interface_package_template.render({"package": package, "config": config.data})
         filepath = "{}/{}.h".format(package["dst"], package["name"])
         utilities.File.write(filepath, output)
 
     def translator(self):
         return JavaToObjC(self)
-
 
 if __name__ == '__main__':
     manager = engine.Manager(Factory())

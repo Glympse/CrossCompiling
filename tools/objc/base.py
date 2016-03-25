@@ -4,6 +4,10 @@
 #
 #------------------------------------------------------------------------------
 
+import sys
+
+import plyj.model
+
 import utilities
 
 
@@ -120,3 +124,44 @@ class BaseTranslator(object):
                     "cpp_arg_type": "const Glympse::{}&".format(type),
                     "native": False
                 }
+
+    @staticmethod
+    def convert_extends(config, package, type):
+        converted = []
+        extends = type.extends
+        if isinstance(extends, list):
+            for extend in extends:
+                converted.append(BaseTranslator.convert_type(config, package, extend))
+        elif isinstance(extends, plyj.model.Type):
+            converted.append(BaseTranslator.convert_type(config, package, extends))
+        return converted
+
+    @staticmethod
+    def dependency_sort(package):
+        types = package["types"]
+        info = package["types_info"]
+        sorted = []
+
+        last_length = sys.maxint
+        while len(types) < last_length and 0 < len(types):
+            last_length = len(types)
+            next_types = list(types)
+            for type in types:
+                satisfied = True
+                for dependency in type.extends:
+                    name = dependency["objc_name"]
+                    if name in info:
+                        # We only care about types that are imported as part of the same package. If the dependency is
+                        # being satisfied in another way, then it is not relevant to this sort. So we simply check if
+                        # there is a dependency still in the type list.
+                        if info[name] in types:
+                            satisfied = False
+                            break
+                if satisfied:
+                    sorted.append(type)
+                    next_types.remove(type)
+            types = next_types
+
+        if 0 != len(types):
+            raise Exception('Unable to satisfy dependencies: ', types)
+        return sorted

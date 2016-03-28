@@ -1,11 +1,15 @@
-{% macro base_class(package, type) -%}
-{% if type.name.objc_name in package.hierarchy and package.hierarchy[type.name.objc_name].base %}
-{{ package.hierarchy[type.name.objc_name].base }}
-{% else %}
-GlyCommon
+{% macro protocol_heirarchy(package, type) -%}
+{%- if type.protocols %}
+< {{",".join(type.protocols) }} >
+{%- else %}
+< NSObject >
 {%- endif %}
-{%- if type.is_sink %}
-< GlyEventSink >
+{%- endmacro %}
+
+{% macro class_heirarchy(package, type) -%}
+{{ type.base_class -}}
+{%- if type.protocols %}
+< {{",".join(type.protocols) }} >
 {%- endif %}
 {%- endmacro %}
 

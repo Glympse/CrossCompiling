@@ -152,6 +152,8 @@ class BaseTranslator(object):
             for type in types:
                 satisfied = True
                 for dependency in type.extends:
+                    if not dependency:
+                        continue
                     name = dependency["objc_name"]
                     if name in info:
                         # We only care about types that are imported as part of the same package. If the dependency is

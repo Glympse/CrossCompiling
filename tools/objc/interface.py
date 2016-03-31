@@ -16,7 +16,7 @@ class InterfaceTranslator(base.BaseTranslator):
         # Type properties
         type.is_protocol = type.name["objc_name"] in config.data["protocols"]
         type.base_class, type.protocols = InterfaceTranslator.__find_class_hierarchy(config, package, type)
-        type.is_sink = "GlyEventSink" in type.protocols
+        type.is_sink = config.data["params"]["sink"]["source"] in type.protocols
         type.has_private = type.name["objc_name"] in package["private"]
 
         # Interfaces
@@ -66,20 +66,20 @@ class InterfaceTranslator(base.BaseTranslator):
     @staticmethod
     def __find_class_hierarchy(config, package, type):
         base = "GlyCommon"
-
         name = type.name["objc_name"]
         info = package["types_info"]
         protocols = config.data["protocols"]
 
-        if name in info:
-            type = info[name]
-            dependency = []
+        if not name in info:
+            return base, []
 
-            if type.extends:
-                first = type.extends[0]["objc_name"]
-                if first not in protocols:
-                    base = first
+        type = info[name]
+        if not type.extends:
+            return base, []
 
-            interfaces = [ x["objc_name"] for x in type.extends if x["objc_name"] in protocols ]
+        first = type.extends[0]["objc_name"]
+        if first not in protocols:
+            base = first
+        interfaces = [ x["objc_name"] for x in type.extends if x["objc_name"] in protocols ]
 
         return base, interfaces

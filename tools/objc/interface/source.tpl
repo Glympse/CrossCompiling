@@ -17,7 +17,7 @@
     {{ type.name.cpp_holder_type }} _common;
 {% endif %}
 {% if type.is_sink %}
-    GlyCommonSink* _commonSink;
+    {{ config.params.sink.common }}* _commonSink;
 {% endif %}
 }
 @end
@@ -33,7 +33,7 @@
     {
         _common = object;
 {% if type.is_sink %}
-        _commonSink = [[GlyCommonSink alloc] initWithSink:object];
+        _commonSink = [[{{ config.params.sink.common }} alloc] initWithSink:object];
 {% endif %}
     }
     return self;

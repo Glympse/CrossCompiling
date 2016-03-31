@@ -25,9 +25,11 @@ class ClassTranslator(base.BaseTranslator):
 
     def __process_type(self, config, package, type):
         # Format new type name
+        cpp_namespace = config.data["params"]["cpp_namespace"]
         objc_name = "Gly{}".format(type.name)
         type.name = {
             "java_name": type.name,
+            "cpp_type": "{}::{}".format(cpp_namespace, type.name),
             "objc_name": objc_name
         }
 

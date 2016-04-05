@@ -18,15 +18,15 @@
 {{ macros.method_signature(method=item) }}
 {
 {% if item.return_type.native %}
-    return Glympse::{{ type.name.java_name }}::{{ item.name }}({{ macros.method_call_args(method=item) }});
+    return {{ type.name.cpp_type }}::{{ item.name }}({{ macros.method_call_args(method=item) }});
 {% else %}
-    return Glympse::ClassBinder::bind(Glympse::{{ type.name.java_name }}::{{ item.name }}({{ macros.method_call_args(method=item) }}));
+    return Glympse::ClassBinder::bind({{ type.name.cpp_type }}::{{ item.name }}({{ macros.method_call_args(method=item) }}));
 {% endif %}
 }
 {% else %}
 + ({{ item.type.objc_type }}){{ item.variable_declarators[0].variable.name }}
 {
-    return Glympse::{{ type.name.java_name }}::{{ item.variable_declarators[0].variable.name }};
+    return {{ type.name.cpp_type }}::{{ item.variable_declarators[0].variable.name }};
 }
 {% endif %}
 

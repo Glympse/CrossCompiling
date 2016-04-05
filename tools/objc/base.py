@@ -84,6 +84,7 @@ class BaseTranslator(object):
         if type in config.data["types"]:
             return config.data["types"][type]
         if type.startswith("G"):
+            cpp_namespace = config.data["params"]["cpp_namespace"]
             interface_name = type[1:]
             objc_type_name = "Gly{}".format(interface_name)
             if objc_type_name in config.data["undefined"]:
@@ -100,8 +101,8 @@ class BaseTranslator(object):
                     "objc_name": objc_type_name,
                     "objc_type": "id<{}>".format(objc_type_name),
                     "objc_arg_name": objc_type_name,
-                    "cpp_type": "Glympse::{}".format(type),
-                    "cpp_arg_type": "const Glympse::{}&".format(type),
+                    "cpp_type": "{}::{}".format(cpp_namespace, type),
+                    "cpp_arg_type": "const {}::{}&".format(cpp_namespace, type),
                     "native": False
                 }
             else:
@@ -120,9 +121,9 @@ class BaseTranslator(object):
                     "objc_name": objc_type_name,
                     "objc_type": objc_type,
                     "objc_arg_name": objc_type_name,
-                    "cpp_type": "Glympse::{}".format(type),
-                    "cpp_holder_type": "Glympse::Holder<Glympse::I{}>".format(interface_name),
-                    "cpp_holder_private_type": "Glympse::Holder<Glympse::I{}Private>".format(interface_name),
+                    "cpp_type": "{}::{}".format(cpp_namespace, type),
+                    "cpp_holder_type": "Glympse::Holder<{}::I{}>".format(cpp_namespace, interface_name),
+                    "cpp_holder_private_type": "Glympse::Holder<{}::I{}Private>".format(cpp_namespace, interface_name),
                     "cpp_arg_type": "const Glympse::{}&".format(type),
                     "native": False
                 }
@@ -151,6 +152,8 @@ class BaseTranslator(object):
             for type in types:
                 satisfied = True
                 for dependency in type.extends:
+                    if not dependency:
+                        continue
                     name = dependency["objc_name"]
                     if name in info:
                         # We only care about types that are imported as part of the same package. If the dependency is

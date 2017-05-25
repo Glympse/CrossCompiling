@@ -1,6 +1,6 @@
 //------------------------------------------------------------------------------
 //
-//  Copyright (c) 2016 Glympse Inc. All rights reserved.
+//  Copyright (c) 2017 Glympse Inc. All rights reserved.
 //
 //------------------------------------------------------------------------------
 {% import 'macros.tpl' as macros %}

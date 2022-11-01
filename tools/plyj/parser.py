@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 import ply.lex as lex
 import ply.yacc as yacc
@@ -23,7 +23,6 @@ class MyLexer(object):
         'NUM',
         'CHAR_LITERAL',
         'STRING_LITERAL',
-        'LINE_COMMENT', 'BLOCK_COMMENT',
 
         'OR', 'AND',
         'EQ', 'NEQ', 'GTEQ', 'LTEQ',

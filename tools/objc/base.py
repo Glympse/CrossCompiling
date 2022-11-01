@@ -145,7 +145,7 @@ class BaseTranslator(object):
         info = package["types_info"]
         sorted = []
 
-        last_length = sys.maxint
+        last_length = sys.maxsize
         while len(types) < last_length and 0 < len(types):
             last_length = len(types)
             next_types = list(types)

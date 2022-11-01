@@ -4,7 +4,7 @@
 #
 #------------------------------------------------------------------------------
 
-import dircache, os, sys
+import os, sys
 import utilities
 
 
@@ -22,7 +22,7 @@ class DirectoryWalker:
     def process(self):
         self.factory.begin_package(self.config, self.package)
 
-        dir = dircache.listdir(self.src_dir)
+        dir = os.listdir(self.src_dir)
         dir = dir[:]
         
         for file in dir:
@@ -54,7 +54,7 @@ class Config:
     def __init__(self):
         # Check input
         if ( len(sys.argv) < 2 ):
-            print "usage: cpp2[lang].py config"
+            print("usage: cpp2[lang].py config")
             exit(1)
 
         # Load config data    

@@ -4,7 +4,7 @@
 #
 #------------------------------------------------------------------------------
 
-import base
+from . import base
 
 
 class InterfaceTranslator(base.BaseTranslator):

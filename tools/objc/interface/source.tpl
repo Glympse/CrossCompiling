@@ -46,7 +46,9 @@
 {%- endfor %}
 {% if type.is_sink %}
 {% include "sink.tpl" %}
-
-
 {% endif %}
+{% if type.is_persistable %}
+{% include "persistable.tpl" %}
+{% endif %}
+
 @end

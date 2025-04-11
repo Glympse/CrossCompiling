@@ -17,6 +17,7 @@ class InterfaceTranslator(base.BaseTranslator):
         type.is_protocol = type.name["objc_name"] in config.data["protocols"]
         type.base_class, type.protocols = InterfaceTranslator.__find_class_hierarchy(config, package, type)
         type.is_sink = config.data["params"]["sink"]["source"] in type.protocols
+        type.is_persistable = config.data["params"]["persistable"] in type.protocols
         type.has_private = type.name["objc_name"] in package["private"]
 
         # Interfaces

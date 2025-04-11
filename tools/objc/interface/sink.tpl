@@ -9,3 +9,8 @@
 {
     return [_commonSink removeListener:listener];
 }
+
+- (GlyCommon *)getContext:(long long)key
+{
+    return [_commonSink getContext:key];
+}
